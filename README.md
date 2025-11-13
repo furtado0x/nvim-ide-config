@@ -396,12 +396,29 @@ Esta configuração usa **números relativos** (`relativenumber`), facilitando p
 | Atalho | Descrição |
 |--------|-----------|
 | `K` | Mostrar documentação (hover) |
+| `gd` | Ir para definição |
+| `gD` | Ir para declaração |
+| `gI` | Ir para implementação |
+| `gr` | Mostrar referências |
 | `<leader>gd` | Ir para definição |
+| `<leader>gi` | Ir para implementação |
 | `<leader>gr` | Mostrar referências |
 | `<leader>ca` | Ações de código |
 | `<leader>rn` | Renomear símbolo |
 | `[d` | Diagnóstico anterior |
 | `]d` | Próximo diagnóstico |
+| `Ctrl+LeftMouse` | Ir para definição (como VS Code) |
+| `Ctrl+RightMouse` | Mostrar referências |
+
+### Navegação de Jumps (Voltar/Avançar)
+
+Após usar `gd`, `gr` ou outros comandos de navegação LSP, você pode voltar/avançar no histórico de posições:
+
+| Atalho | Descrição |
+|--------|-----------|
+| `Ctrl+o` | Voltar para posição anterior (older) |
+| `Ctrl+i` ou `Tab` | Avançar para posição seguinte (newer) |
+| `:jumps` | Listar histórico completo de jumps |
 
 ### Language Servers Instalados
 
