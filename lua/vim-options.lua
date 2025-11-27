@@ -9,6 +9,7 @@ vim.opt.swapfile = false
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.clipboard = "unnamedplus"
+vim.opt.mouse = "a"
 
 -- Navigate vim panes better
 vim.keymap.set('n', '<c-k>', ':wincmd k<CR>')
@@ -18,6 +19,11 @@ vim.keymap.set('n', '<c-l>', ':wincmd l<CR>')
 
 vim.keymap.set('n', '<leader>h', ':nohlsearch<CR>')
 vim.wo.number = true
+
+-- Clipboard operations with Ctrl+C/V/X
+vim.keymap.set('v', '<C-c>', '"+y', { desc = 'Copy to clipboard' })
+vim.keymap.set({'n', 'i'}, '<C-v>', '"+p', { desc = 'Paste from clipboard' })
+vim.keymap.set('v', '<C-x>', '"+d', { desc = 'Cut to clipboard' })
 
 -- Auto-abrir Neo-tree e terminal quando abrir diretório (nvim .)
 vim.api.nvim_create_autocmd("VimEnter", {

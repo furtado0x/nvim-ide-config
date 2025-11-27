@@ -12,8 +12,10 @@ return {
       popup_border_style = "rounded",
       enable_git_status = true,
       enable_diagnostics = true,
+      open_files_do_not_replace_types = { "terminal", "trouble", "qf" },
       filesystem = {
         filtered_items = {
+          visible = false,
           hide_dotfiles = true,
           hide_gitignored = true,
           hide_by_name = {
@@ -23,6 +25,7 @@ return {
         follow_current_file = {
           enabled = true,
         },
+        hijack_netrw_behavior = "open_current",
       },
       window = {
         position = "left",
@@ -33,7 +36,7 @@ return {
         },
       },
     })
-    
+
     vim.keymap.set("n", "<C-n>", ":Neotree filesystem reveal left<CR>", {})
     vim.keymap.set("n", "<leader>bf", ":Neotree buffers reveal float<CR>", {})
     vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle file explorer" })

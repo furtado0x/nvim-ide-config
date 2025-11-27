@@ -32,6 +32,8 @@ Space + e   # Abre Neo-tree à esquerda
   - [Telescope (Busca Fuzzy)](#telescope-busca-fuzzy)
   - [Neo-tree (Explorador de Arquivos)](#neo-tree-explorador-de-arquivos)
   - [LSP (Language Server Protocol)](#lsp-language-server-protocol)
+  - [Autocomplete Avançado](#autocomplete-avançado)
+  - [Snippets](#snippets)
   - [Git (Fugitive e Gitsigns)](#git-fugitive-e-gitsigns)
   - [Terminais](#terminais)
 - [Marcos (Marks)](#marcos-marks)
@@ -189,6 +191,20 @@ nvim meu_arquivo.py
 | `<Esc><Esc>` | Terminal | Sair do modo terminal |
 | `<C-w>` | Terminal | Navegação de janelas no terminal |
 
+### Clipboard e Mouse
+
+| Atalho | Modo | Descrição |
+|--------|------|-----------|
+| `Ctrl-c` | Visual | Copiar seleção para clipboard do sistema |
+| `Ctrl-v` | Normal/Insert | Colar do clipboard do sistema |
+| `Ctrl-x` | Visual | Recortar seleção para clipboard do sistema |
+
+> **💡 Suporte ao Mouse Habilitado:**
+> - Você pode **selecionar texto com o mouse** em qualquer modo
+> - Use **Ctrl+C** para copiar o texto selecionado
+> - O texto copiado fica disponível para colar em **qualquer aplicação** (navegador, editor, etc.)
+> - A integração com o clipboard do sistema está ativa via `clipboard=unnamedplus`
+
 ---
 
 ## Navegação no Vim
@@ -304,8 +320,11 @@ Esta configuração usa **números relativos** (`relativenumber`), facilitando p
 | `p` | Colar após o cursor |
 | `P` | Colar antes do cursor |
 | `]p` | Colar e ajustar indentação |
+| `Ctrl-v` | **Colar do clipboard do sistema** (modos normal/insert) |
 
 > **Nota:** Esta configuração usa `clipboard=unnamedplus`, então copiar/colar funciona com o clipboard do sistema!
+>
+> **Novo:** Use `Ctrl+C` para copiar e `Ctrl+V` para colar, como em outros editores!
 
 ### Desfazer/Refazer
 
@@ -354,9 +373,11 @@ Esta configuração usa **números relativos** (`relativenumber`), facilitando p
 | `Ctrl-j/k` | Navegar para baixo/cima |
 | `Enter` | Abrir arquivo |
 | `Ctrl-x` | Abrir em split horizontal |
-| `Ctrl-v` | Abrir em split vertical |
+| `Ctrl-v` | Abrir em split vertical (não confundir com colar!) |
 | `Ctrl-t` | Abrir em nova tab |
 | `Esc` | Fechar |
+
+> **Nota:** Dentro do Telescope, `Ctrl-v` abre em split vertical. Para colar, use `Ctrl-v` fora do Telescope.
 
 ---
 
@@ -391,22 +412,61 @@ Esta configuração usa **números relativos** (`relativenumber`), facilitando p
 
 ## LSP (Language Server Protocol)
 
-### Atalhos LSP
+### Atalhos LSP - Navegação de Código
+
+| Atalho | Descrição | Quando usar |
+|--------|-----------|-------------|
+| `K` | Mostrar documentação (hover) | Ver o que uma função/classe faz sem sair do lugar |
+| `gd` | Ir para definição | Ir onde a função/classe foi definida |
+| `gD` | Ir para declaração | Similar ao `gd`, útil em C/C++ |
+| `gI` | Ir para implementação | Ver implementação de interface/classe abstrata |
+| `gr` | Mostrar referências | Ver todos os lugares onde algo é usado |
+| `<leader>D` | Type definition | Ir ao tipo de uma variável |
+
+### Atalhos LSP - Code Actions
+
+| Atalho | Descrição | Quando usar |
+|--------|-----------|-------------|
+| `<leader>ca` | Code Action | Auto-import, extrair função, corrigir erro |
+| `<leader>rn` | Renomear símbolo | Renomeia em todo o projeto de forma segura |
+| `<leader>ws` | Workspace Symbols | Busca funções/classes em todo o projeto |
+
+### Atalhos LSP - Diagnósticos
+
+| Atalho | Descrição | Quando usar |
+|--------|-----------|-------------|
+| `[d` | Diagnóstico anterior | Navega para o erro/warning anterior |
+| `]d` | Próximo diagnóstico | Navega para o próximo erro/warning |
+| `<leader>d` | Float diagnóstico | Mostra erro completo em popup |
+| `<leader>q` | Lista de diagnósticos | Abre todos os erros numa lista navegável |
+
+### Atalhos LSP - Signature Help
+
+| Atalho | Modo | Descrição |
+|--------|------|-----------|
+| `<C-k>` | Insert | Mostra parâmetros da função enquanto digita |
+| `<leader>sh` | Normal | Signature help no modo normal |
+
+### Inlay Hints (Tipos Inline)
+
+Mostra tipos das variáveis diretamente no código (requer Neovim 0.10+):
 
 | Atalho | Descrição |
 |--------|-----------|
-| `K` | Mostrar documentação (hover) |
-| `gd` | Ir para definição |
-| `gD` | Ir para declaração |
-| `gI` | Ir para implementação |
-| `gr` | Mostrar referências |
-| `<leader>gd` | Ir para definição |
-| `<leader>gi` | Ir para implementação |
-| `<leader>gr` | Mostrar referências |
-| `<leader>ca` | Ações de código |
-| `<leader>rn` | Renomear símbolo |
-| `[d` | Diagnóstico anterior |
-| `]d` | Próximo diagnóstico |
+| `<leader>ih` | Liga/desliga inlay hints |
+
+```python
+# Sem inlay hints:
+resultado = soma(1, 2)
+
+# Com inlay hints (você vê inline no editor):
+resultado: int = soma(a: 1, b: 2)
+```
+
+### Atalhos LSP - Mouse
+
+| Atalho | Descrição |
+|--------|-----------|
 | `Ctrl+LeftMouse` | Ir para definição (como VS Code) |
 | `Ctrl+RightMouse` | Mostrar referências |
 
@@ -422,10 +482,103 @@ Após usar `gd`, `gr` ou outros comandos de navegação LSP, você pode voltar/a
 
 ### Language Servers Instalados
 
-- **Python**: `pyright` (FastAPI, Django)
-- **HTML**: `html` (templates)
-- **Lua**: `lua_ls` (config do Neovim)
+- **Python**: `basedpyright` (fork avançado do Pyright com melhor inferência de tipos)
+- **Python**: `ruff` (linter/formatter ultra-rápido, substitui flake8/black/isort)
+- **HTML**: `html` (templates Django)
+- **Lua**: `lua_ls` (config do Neovim com suporte completo à API)
 - **TypeScript/JavaScript**: `ts_ls`
+
+> **Detecção automática de virtualenv**: O LSP detecta automaticamente `venv`, `.venv`, `env`, `.env` e Poetry no seu projeto.
+
+---
+
+## Autocomplete Avançado
+
+O autocomplete usa **nvim-cmp** com múltiplas fontes de sugestões, ordenadas por prioridade.
+
+### Fontes de Autocomplete
+
+| Fonte | Descrição | Indicador |
+|-------|-----------|-----------|
+| LSP | Sugestões do Language Server (funções, classes, variáveis) | `[LSP]` |
+| Signature | Parâmetros da função atual | `[Sig]` |
+| Snippets | Templates de código expandíveis | `[Snip]` |
+| Path | Caminhos de arquivos/diretórios | `[Path]` |
+| Buffer | Palavras do arquivo atual | `[Buf]` |
+
+### Atalhos no Menu de Autocomplete
+
+| Atalho | Descrição |
+|--------|-----------|
+| `<C-Space>` | Forçar abertura do autocomplete |
+| `<Tab>` | Próxima sugestão |
+| `<S-Tab>` | Sugestão anterior |
+| `<CR>` (Enter) | Confirmar seleção |
+| `<C-e>` | Cancelar/fechar menu |
+| `<C-b>` | Scroll documentação para cima |
+| `<C-f>` | Scroll documentação para baixo |
+
+### Ghost Text
+
+O autocomplete mostra um **preview fantasma** do texto que será inserido (em cinza claro). Isso ajuda a ver o que será completado antes de confirmar.
+
+### Autocomplete na Linha de Comando
+
+O autocomplete também funciona nos comandos do Neovim:
+
+- `:` - Autocomplete de comandos e paths
+- `/` ou `?` - Autocomplete de palavras do buffer para busca
+
+---
+
+## Snippets
+
+Snippets são templates de código que expandem ao digitar uma palavra-chave e pressionar Tab.
+
+### Atalhos de Navegação em Snippets
+
+| Atalho | Modo | Descrição |
+|--------|------|-----------|
+| `<C-j>` | Insert/Select | Pular para próximo placeholder |
+| `<C-k>` | Insert/Select | Voltar para placeholder anterior |
+| `<C-l>` | Insert/Select | Alternar entre opções (choice nodes) |
+
+### Exemplo de Uso
+
+```python
+# 1. Digite "def" e pressione Tab para expandir:
+def function_name(params):
+    pass
+    # ^ cursor começa aqui no nome da função
+
+# 2. Digite o nome da função, pressione <C-j>:
+def minha_funcao(params):
+    pass
+    # ^ cursor pula para "params"
+
+# 3. Digite os parâmetros, pressione <C-j>:
+def minha_funcao(x, y):
+    pass
+    # ^ cursor pula para o corpo da função
+```
+
+### Snippets Python Disponíveis
+
+Alguns snippets úteis incluídos (do `friendly-snippets`):
+
+| Trigger | Expansão |
+|---------|----------|
+| `def` | Definição de função |
+| `class` | Definição de classe |
+| `if` | Bloco if |
+| `for` | Loop for |
+| `try` | Bloco try/except |
+| `with` | Context manager |
+| `main` | `if __name__ == "__main__":` |
+| `imp` | Import statement |
+| `from` | From import |
+
+> **Dica**: Digite o trigger e pressione `<Tab>` para expandir. Use `<C-j>` e `<C-k>` para navegar entre os campos editáveis.
 
 ---
 
@@ -560,6 +713,7 @@ ma              " Marca posição como 'a'
 | `v` | Modo visual (caractere) |
 | `V` | Modo visual (linha) |
 | `Ctrl-v` | Modo visual (bloco) |
+| Mouse | **Selecionar com o mouse** (arraste para selecionar) |
 
 ### No Modo Visual
 
@@ -574,6 +728,8 @@ ma              " Marca posição como 'a'
 | `u` | Converter para minúsculas |
 | `U` | Converter para maiúsculas |
 | `~` | Inverter case |
+| `Ctrl-c` | **Copiar para clipboard do sistema** |
+| `Ctrl-x` | **Recortar para clipboard do sistema** |
 
 ---
 
@@ -679,10 +835,17 @@ sudo apt install xclip
 - **lazy.nvim**: Gerenciador de plugins
 - **neo-tree**: Explorador de arquivos
 - **telescope**: Busca fuzzy
-- **treesitter**: Syntax highlighting
-- **LSP**: Autocomplete e análise de código
+- **treesitter**: Syntax highlighting avançado
+- **nvim-lspconfig**: Configuração de Language Servers
 - **mason**: Gerenciador de LSP servers
-- **nvim-cmp**: Autocompletar
+- **nvim-cmp**: Autocompletar avançado com múltiplas fontes
+- **cmp-nvim-lsp**: Fonte LSP para autocomplete
+- **cmp-buffer**: Fonte buffer para autocomplete
+- **cmp-path**: Fonte path para autocomplete
+- **cmp-cmdline**: Autocomplete na linha de comando
+- **cmp-nvim-lsp-signature-help**: Signature help inline
+- **LuaSnip**: Engine de snippets
+- **friendly-snippets**: Coleção de snippets prontos
 - **gitsigns**: Indicadores Git
 - **vim-fugitive**: Comandos Git
 - **toggleterm**: Terminal embutido
