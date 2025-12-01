@@ -7,6 +7,23 @@ vim.g.background = "light"
 
 vim.opt.swapfile = false
 vim.opt.number = true
+
+-- Auto-reload arquivos modificados externamente (ex: Claude Code)
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  pattern = "*",
+  callback = function()
+    if vim.fn.mode() ~= "c" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = "*",
+  callback = function()
+    vim.notify("Arquivo atualizado externamente", vim.log.levels.INFO)
+  end,
+})
 vim.opt.relativenumber = true
 vim.opt.clipboard = "unnamedplus"
 vim.opt.mouse = "a"
