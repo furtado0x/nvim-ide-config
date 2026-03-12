@@ -59,8 +59,28 @@ return {
           end
         end
 
+        -- Pyenv: resolve o interpretador real a partir do .python-version
+        local pyenv_root = vim.env.PYENV_ROOT or path.join(vim.env.HOME, '.pyenv')
+        local python_version_file = path.join(workspace or vim.fn.getcwd(), '.python-version')
+        if vim.fn.filereadable(python_version_file) == 1 then
+          local version = vim.fn.trim(vim.fn.readfile(python_version_file)[1])
+          local pyenv_python = path.join(pyenv_root, 'versions', version, 'bin', 'python')
+          if vim.fn.executable(pyenv_python) == 1 then
+            return pyenv_python
+          end
+        end
+
         -- Fallback para python do sistema
         return vim.fn.exepath('python3') or vim.fn.exepath('python') or 'python'
+      end
+
+      -- Filtra notificações de enumeração lenta do basedpyright (é apenas um aviso, não um erro)
+      local original_notify = vim.notify
+      vim.notify = function(msg, ...)
+        if type(msg) == "string" and msg:find("Enumeration of workspace source files") then
+          return
+        end
+        return original_notify(msg, ...)
       end
 
       -- Autocmd para configurar keymaps quando LSP anexa ao buffer
@@ -69,6 +89,7 @@ return {
         callback = function(ev)
           local opts = { buffer = ev.buf, silent = true }
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
 
           -- Keymaps LSP específicos do buffer
           vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
@@ -100,13 +121,6 @@ return {
           vim.keymap.set("n", "<C-LeftMouse>", "<LeftMouse><cmd>lua vim.lsp.buf.definition()<CR>", opts)
           vim.keymap.set("n", "<C-RightMouse>", "<LeftMouse><cmd>lua vim.lsp.buf.references()<CR>", opts)
 
-          -- Inlay hints (Neovim 0.10+) - mostra tipos inline
-          if client and client.server_capabilities.inlayHintProvider then
-            vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
-            vim.keymap.set("n", "<leader>ih", function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
-            end, { buffer = ev.buf, desc = "Toggle inlay hints" })
-          end
         end,
       })
 
@@ -115,6 +129,7 @@ return {
         -- Basedpyright: fork mais avançado do Pyright
         basedpyright = {
           filetypes = { "python" },
+          root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
           settings = {
             basedpyright = {
               analysis = {
@@ -129,12 +144,29 @@ return {
                   pytestParameters = true,
                 },
                 autoImportCompletions = true,
+                diagnosticSeverityOverrides = {
+                  reportUntypedFunctionDecorator = false,
+                  reportUnknownVariableType = false,
+                },
               },
             },
           },
           before_init = function(_, config)
             config.settings.python = config.settings.python or {}
             config.settings.python.pythonPath = get_python_path(config.root_dir)
+          end,
+          on_attach = function(client, _)
+            client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
+              basedpyright = {
+                analysis = {
+                  diagnosticSeverityOverrides = {
+                    reportUntypedFunctionDecorator = false,
+                    reportUnknownVariableType = false,
+                  },
+                },
+              },
+            })
+            client:notify("workspace/didChangeConfiguration", { settings = client.settings })
           end,
         },
 
@@ -146,7 +178,7 @@ return {
               lineLength = 120,
               lint = {
                 enable = true,
-                select = { "E", "F", "W", "I", "UP", "B", "C4", "SIM" },
+                select = { "E", "F", "W", "UP", "B", "C4", "SIM" },
               },
               format = {
                 enable = true,
@@ -208,19 +240,16 @@ return {
         vim.lsp.enable(server)
       end
 
-      -- Diagnósticos mais bonitos
+      -- Diagnósticos - sem virtual text inline
       vim.diagnostic.config({
-        virtual_text = {
-          prefix = '●',
-          source = "if_many",
-        },
+        virtual_text = false,
         float = {
           border = "rounded",
           source = true,
           header = "",
           prefix = "",
         },
-        signs = true,
+        signs = false,
         underline = true,
         update_in_insert = false,
         severity_sort = true,

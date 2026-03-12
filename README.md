@@ -35,6 +35,8 @@ Space + e   # Abre Neo-tree à esquerda
   - [Autocomplete Avançado](#autocomplete-avançado)
   - [Snippets](#snippets)
   - [Git (Fugitive e Gitsigns)](#git-fugitive-e-gitsigns)
+  - [Diffview (Diffs e Merge Conflicts)](#diffview-diffs-e-merge-conflicts)
+  - [Debug (DAP)](#debug-dap)
   - [Terminais](#terminais)
 - [Marcos (Marks)](#marcos-marks)
 - [Modo Visual](#modo-visual)
@@ -124,6 +126,8 @@ nvim
 │       ├── completions.lua     # Autocompletar
 │       ├── treesitter.lua      # Syntax highlighting
 │       ├── git-stuff.lua       # Git integrado
+│       ├── diffview.lua        # Diffs e merge conflicts visuais
+│       ├── dap.lua             # Debug (breakpoints, step, watches)
 │       ├── toggleterm.lua      # Terminal embutido
 │       └── ...
 └── README.md                   # Este arquivo
@@ -433,6 +437,8 @@ Esta configuração usa **números relativos** (`relativenumber`), facilitando p
 
 ### Atalhos LSP - Diagnósticos
 
+Os diagnósticos são exibidos de forma minimalista (apenas underline nos erros). Para ver detalhes:
+
 | Atalho | Descrição | Quando usar |
 |--------|-----------|-------------|
 | `[d` | Diagnóstico anterior | Navega para o erro/warning anterior |
@@ -440,28 +446,14 @@ Esta configuração usa **números relativos** (`relativenumber`), facilitando p
 | `<leader>d` | Float diagnóstico | Mostra erro completo em popup |
 | `<leader>q` | Lista de diagnósticos | Abre todos os erros numa lista navegável |
 
+> **Nota:** Virtual text e sinais na lateral estão desabilitados para manter o editor limpo. Use `<leader>d` para ver os diagnósticos.
+
 ### Atalhos LSP - Signature Help
 
 | Atalho | Modo | Descrição |
 |--------|------|-----------|
 | `<C-k>` | Insert | Mostra parâmetros da função enquanto digita |
 | `<leader>sh` | Normal | Signature help no modo normal |
-
-### Inlay Hints (Tipos Inline)
-
-Mostra tipos das variáveis diretamente no código (requer Neovim 0.10+):
-
-| Atalho | Descrição |
-|--------|-----------|
-| `<leader>ih` | Liga/desliga inlay hints |
-
-```python
-# Sem inlay hints:
-resultado = soma(1, 2)
-
-# Com inlay hints (você vê inline no editor):
-resultado: int = soma(a: 1, b: 2)
-```
 
 ### Atalhos LSP - Mouse
 
@@ -624,6 +616,209 @@ Alguns snippets úteis incluídos (do `friendly-snippets`):
 |--------|-----------|
 | `<leader>gp` | Preview hunk |
 | `<leader>gt` | Toggle blame da linha |
+
+---
+
+## Diffview (Diffs e Merge Conflicts)
+
+Plugin para visualizar diffs e resolver merge conflicts com layout visual, similar ao VS Code.
+
+### Atalhos Diffview
+
+| Atalho | Modo | Descrição |
+|--------|------|-----------|
+| `<leader>gv` | Normal | Abrir diff view (todas as mudanças) |
+| `<leader>gc` | Normal | Fechar diff view |
+| `<leader>gh` | Normal | Histórico do arquivo atual |
+| `<leader>gH` | Normal | Histórico do branch inteiro |
+| `<leader>gm` | Normal | Diff contra a branch main |
+| `<leader>gh` | Visual | Histórico da seleção de linhas |
+
+### Dentro do Diffview
+
+| Tecla | Descrição |
+|-------|-----------|
+| `Tab` | Próximo arquivo com mudanças |
+| `Shift-Tab` | Arquivo anterior com mudanças |
+| `[x` | Conflito anterior |
+| `]x` | Próximo conflito |
+| `<leader>co` | Escolher versão OURS (sua) |
+| `<leader>ct` | Escolher versão THEIRS (deles) |
+| `<leader>cb` | Escolher BASE |
+| `<leader>ca` | Escolher ALL (ambas) |
+| `dx` | Deletar entrada de conflito |
+
+### Exemplos de Uso
+
+```bash
+# Ver todas as mudanças não commitadas
+Space + g + v
+
+# Comparar branch atual com main
+Space + g + m
+
+# Ver histórico de um arquivo (quem mudou o quê)
+Space + g + h
+
+# Fechar a visualização
+Space + g + c
+```
+
+### Resolvendo Merge Conflicts
+
+```bash
+# 1. Quando tiver conflitos, abra o diffview:
+Space + g + v
+
+# 2. Navegue entre conflitos:
+]x    (próximo conflito)
+[x    (conflito anterior)
+
+# 3. Escolha a versão desejada:
+<leader>co    (sua versão - OURS)
+<leader>ct    (versão deles - THEIRS)
+
+# 4. Feche quando terminar:
+Space + g + c
+```
+
+> **Nota:** O diffview usa layout 3-way merge, mostrando LOCAL | BASE | REMOTE, similar ao merge editor do VS Code.
+
+---
+
+## Debug (DAP)
+
+Debug integrado com nvim-dap e nvim-dap-ui. Suporta breakpoints, step-through, watches e REPL, com configuração automática para Python (debugpy).
+
+### Layout do Debugger
+
+Ao iniciar uma sessão de debug, o layout abre automaticamente:
+
+```
+┌──────────────┬──────────────────────────────────────┐
+│  Scopes      │                                      │
+│  Breakpoints │         Editor com código             │
+│  Stacks      │         (linha atual destacada)       │
+│  Watches     │                                      │
+├──────────────┴──────────────────────────────────────┤
+│  REPL                    │  Console                  │
+└──────────────────────────┴───────────────────────────┘
+```
+
+### Atalhos de Debug (prefixo `<leader>d`)
+
+| Atalho | Descrição |
+|--------|-----------|
+| `<leader>db` | Toggle breakpoint |
+| `<leader>dB` | Breakpoint condicional (com condição) |
+| `<leader>dX` | Limpar todos os breakpoints |
+| `<leader>dl` | Log point (imprime mensagem sem parar) |
+| `<leader>dc` | Continue / Iniciar debug |
+| `<leader>do` | Step over (executa linha, não entra em funções) |
+| `<leader>di` | Step into (entra dentro da função) |
+| `<leader>dO` | Step out (sai da função atual) |
+| `<leader>dr` | Restart debug |
+| `<leader>dx` | Terminar sessão de debug |
+| `<leader>du` | Toggle DAP UI (abrir/fechar painel) |
+| `<leader>de` | Avaliar expressão sob o cursor |
+| `<leader>de` | Avaliar seleção (modo visual) |
+
+### Atalhos Estilo VS Code (Teclas F)
+
+| Atalho | Descrição |
+|--------|-----------|
+| `F5` | Continue / Iniciar debug |
+| `F9` | Toggle breakpoint |
+| `F10` | Step over |
+| `F11` | Step into |
+| `Shift+F11` | Step out |
+
+### Debug de Testes Python
+
+| Atalho | Descrição |
+|--------|-----------|
+| `<leader>dm` | Debug do test method mais próximo |
+| `<leader>dC` | Debug da test class mais próxima |
+
+### Ícones no Editor
+
+| Ícone | Significado |
+|-------|-------------|
+| `●` | Breakpoint ativo |
+| `◐` | Breakpoint condicional |
+| `◆` | Log point |
+| `▶` | Linha atual de execução |
+| `○` | Breakpoint rejeitado |
+
+### Exemplo de Uso: Debug de Script Python
+
+```bash
+# 1. Abra o arquivo Python
+nvim meu_script.py
+
+# 2. Coloque breakpoints nas linhas desejadas
+Space + d + b    (em cada linha que quer parar)
+
+# 3. Inicie o debug
+Space + d + c    (ou F5)
+
+# 4. Navegue pelo código
+Space + d + o    (step over - F10)
+Space + d + i    (step into - F11)
+Space + d + O    (step out - Shift+F11)
+
+# 5. Inspecione variáveis no painel Scopes (abre automaticamente)
+
+# 6. Avalie expressões no REPL ou com:
+Space + d + e    (cursor sobre variável)
+
+# 7. Termine a sessão
+Space + d + x
+```
+
+### Exemplo de Uso: Debug de Teste
+
+```bash
+# 1. Abra o arquivo de teste
+nvim test_meu_modulo.py
+
+# 2. Posicione o cursor dentro de um test method
+
+# 3. Debug do método de teste
+Space + d + m
+
+# O debugpy vai executar apenas aquele teste com debug ativo
+```
+
+### Debug com Docker (Remote Attach)
+
+O projeto já está configurado para debug remoto via Docker. O `docker-compose.yml` instala o `debugpy` e expõe a porta 5678.
+
+```bash
+# 1. Suba o projeto com docker-compose
+docker compose up
+
+# 2. No Neovim, coloque breakpoints
+Space + d + b
+
+# 3. Inicie o debug (F5 ou Space + d + c)
+# Escolha: "Docker: Attach (porta 5678)"
+
+# 4. Acesse a rota/endpoint que quer debugar
+# O Neovim vai parar no breakpoint automaticamente
+```
+
+> **Como funciona:** O debugpy roda dentro do container escutando na porta 5678. O nvim-dap conecta via `localhost:5678` e o `pathMappings` traduz os caminhos (`/app` no container <-> seu diretório local), permitindo que breakpoints e navegação funcionem corretamente.
+
+### Debug Local (sem Docker)
+
+Para debug local, o `debugpy` precisa estar instalado no seu virtualenv:
+
+```bash
+pip install debugpy
+```
+
+> **Nota:** A detecção do virtualenv é automática (mesma lógica do LSP). O debugger usa o Python do seu venv/`.venv`/`VIRTUAL_ENV`.
 
 ---
 
@@ -848,6 +1043,10 @@ sudo apt install xclip
 - **friendly-snippets**: Coleção de snippets prontos
 - **gitsigns**: Indicadores Git
 - **vim-fugitive**: Comandos Git
+- **diffview**: Diffs visuais e merge conflicts (3-way merge)
+- **nvim-dap**: Debug adapter protocol
+- **nvim-dap-ui**: Interface visual para debug (scopes, watches, REPL)
+- **nvim-dap-python**: Configuração automática do debugpy para Python
 - **toggleterm**: Terminal embutido
 - **catppuccin**: Tema
 
