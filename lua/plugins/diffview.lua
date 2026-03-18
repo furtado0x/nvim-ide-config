@@ -3,6 +3,16 @@ return {
   dependencies = {
     "nvim-lua/plenary.nvim",
   },
+  cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+  keys = {
+    { "<leader>gv", ":DiffviewClose<CR>:DiffviewOpen -- %<CR>", desc = "Diff do arquivo atual" },
+    { "<leader>gV", ":DiffviewClose<CR>:DiffviewOpen<CR>", desc = "Diff do projeto todo" },
+    { "<leader>gc", ":DiffviewClose<CR>", desc = "Fechar diff view" },
+    { "<leader>gh", ":DiffviewFileHistory %<CR>", desc = "Histórico do arquivo" },
+    { "<leader>gH", ":DiffviewFileHistory<CR>", desc = "Histórico do branch" },
+    { "<leader>gm", ":DiffviewOpen HEAD...main<CR>", desc = "Diff contra main" },
+    { "<leader>gh", ":'<,'>DiffviewFileHistory<CR>", mode = "v", desc = "Histórico da seleção" },
+  },
   config = function()
     local diffview = require("diffview")
 
@@ -24,12 +34,5 @@ return {
       },
     })
 
-    -- Keymaps (prefixo <leader>gd para "git diff")
-    vim.keymap.set("n", "<leader>gv", ":DiffviewOpen<CR>", { desc = "Abrir diff view" })
-    vim.keymap.set("n", "<leader>gc", ":DiffviewClose<CR>", { desc = "Fechar diff view" })
-    vim.keymap.set("n", "<leader>gh", ":DiffviewFileHistory %<CR>", { desc = "Histórico do arquivo" })
-    vim.keymap.set("n", "<leader>gH", ":DiffviewFileHistory<CR>", { desc = "Histórico do branch" })
-    vim.keymap.set("n", "<leader>gm", ":DiffviewOpen HEAD...main<CR>", { desc = "Diff contra main" })
-    vim.keymap.set("v", "<leader>gh", ":'<,'>DiffviewFileHistory<CR>", { desc = "Histórico da seleção" })
   end,
 }
