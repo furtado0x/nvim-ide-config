@@ -83,6 +83,18 @@ return {
         return original_notify(msg, ...)
       end
 
+      -- Garante que todos os LSP servers sejam parados ao sair do Neovim
+      -- Evita processos órfãos (basedpyright node) consumindo CPU após fechar
+      vim.api.nvim_create_autocmd('VimLeavePre', {
+        callback = function()
+          for _, client in ipairs(vim.lsp.get_clients()) do
+            client:stop()
+          end
+          -- Dá tempo para os processos receberem o shutdown gracefully
+          vim.wait(500, function() return #vim.lsp.get_clients() == 0 end)
+        end,
+      })
+
       -- Autocmd para configurar keymaps quando LSP anexa ao buffer
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('UserLspConfig', {}),
@@ -133,10 +145,10 @@ return {
           settings = {
             basedpyright = {
               analysis = {
-                typeCheckingMode = "standard",
+                typeCheckingMode = "basic",
                 autoSearchPaths = true,
                 useLibraryCodeForTypes = true,
-                diagnosticMode = "workspace",
+                diagnosticMode = "openFilesOnly",
                 inlayHints = {
                   variableTypes = true,
                   functionReturnTypes = true,
